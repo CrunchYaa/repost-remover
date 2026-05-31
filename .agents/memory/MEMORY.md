@@ -1,0 +1,3 @@
+- [ARC auth system](arc-auth.md) — JWT in httpOnly cookie `arc_token`; sessions in DB; device fingerprint via `x-device-fingerprint` header; 403 on mismatch
+- [ARC zod import rule](arc-zod.md) — always `from "zod"`, never `from "zod/v4"` — esbuild cannot resolve the subpath export
+- [ARC admin seed](arc-admin.md) — run `pnpm --filter @workspace/scripts run seed-admin`; credentials `admin@arc.local` / `Admin@12345!`

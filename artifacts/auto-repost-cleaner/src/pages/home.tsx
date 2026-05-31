@@ -1,8 +1,6 @@
-import { Link, useLocation } from "wouter";
-import { useEffect } from "react";
+import { Link } from "wouter";
 import { Shield, Zap, Clock, Eye, ArrowRight, Check } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
-import { useGetAccount } from "@workspace/api-client-react";
 import { motion } from "framer-motion";
 
 const features = [
@@ -36,14 +34,6 @@ const stats = [
 ];
 
 export default function Home() {
-  const [, setLocation] = useLocation();
-  const { data: account } = useGetAccount();
-
-  useEffect(() => {
-    if (account?.connected) {
-      setLocation("/dashboard");
-    }
-  }, [account, setLocation]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -57,12 +47,11 @@ export default function Home() {
             <span className="font-bold text-white">Auto Repost Cleaner</span>
           </div>
           <Link
-            href="/connect"
+            href="/login"
             data-testid="button-get-started-nav"
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium transition-colors"
           >
-            <SiTiktok className="w-4 h-4" />
-            Connect TikTok
+            Sign In
           </Link>
         </div>
       </header>
@@ -101,7 +90,7 @@ export default function Home() {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/dashboard"
+              href="/login"
               data-testid="link-view-dashboard"
               className="px-6 py-3 rounded-xl border border-border hover:border-violet-500/50 text-muted-foreground hover:text-white text-sm font-medium transition-all"
             >

@@ -1,72 +1,76 @@
 import { Router } from "express";
-import { ConnectAccountBody } from "@workspace/api-zod";
+import { db, usersTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
+import { requireAuth, requireSubscription } from "../middlewares/requireAuth";
+import { logAudit } from "../lib/audit";
 
 const router = Router();
 
-interface AccountState {
-  connected: boolean;
-  username: string | null;
-  displayName: string | null;
-  avatarUrl: string | null;
-  followersCount: number | null;
-  followingCount: number | null;
-  connectedAt: string | null;
-}
-
-export const accountState: AccountState = {
-  connected: false,
-  username: null,
-  displayName: null,
-  avatarUrl: null,
-  followersCount: null,
-  followingCount: null,
-  connectedAt: null,
-};
-
-router.get("/account", (req, res) => {
-  res.json(accountState);
+const connectSchema = z.object({
+  username: z.string().min(1).max(64),
+  sessionToken: z.string().min(1),
 });
 
-router.post("/account/connect", (req, res) => {
-  const parsed = ConnectAccountBody.safeParse(req.body);
+router.get("/account", requireAuth, requireSubscription, async (req, res) => {
+  const user = req.user!;
+  res.json({
+    connected: !!user.tiktokUsername,
+    username: user.tiktokUsername ?? null,
+    displayName: user.tiktokUsername ?? null,
+    avatarUrl: null,
+    followersCount: null,
+    followingCount: null,
+    connectedAt: null,
+  });
+});
+
+router.post("/account/connect", requireAuth, requireSubscription, async (req, res) => {
+  const parsed = connectSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid request body" });
     return;
   }
+  const { username, sessionToken } = parsed.data;
 
-  const { username } = parsed.data;
+  await db
+    .update(usersTable)
+    .set({ tiktokUsername: username, tiktokSessionToken: sessionToken, updatedAt: new Date() })
+    .where(eq(usersTable.id, req.user!.id));
 
-  accountState.connected = true;
-  accountState.username = username;
-  accountState.displayName = username;
-  accountState.avatarUrl = null;
-  accountState.followersCount = Math.floor(Math.random() * 50000) + 1000;
-  accountState.followingCount = Math.floor(Math.random() * 1000) + 50;
-  accountState.connectedAt = new Date().toISOString();
-
-  import("./logs.js").then(({ addLog }) => {
-    addLog("account_connect", `Connected TikTok account @${username}`);
+  await logAudit("tiktok.connected", {
+    userId: req.user!.id,
+    category: "account",
+    details: { username },
+    ipAddress: req.ip,
   });
 
-  res.json(accountState);
+  res.json({
+    connected: true,
+    username,
+    displayName: username,
+    avatarUrl: null,
+    followersCount: Math.floor(Math.random() * 50000) + 1000,
+    followingCount: Math.floor(Math.random() * 1000) + 50,
+    connectedAt: new Date().toISOString(),
+  });
 });
 
-router.post("/account/disconnect", (req, res) => {
-  const prevUsername = accountState.username;
+router.post("/account/disconnect", requireAuth, requireSubscription, async (req, res) => {
+  const prevUsername = req.user!.tiktokUsername;
+  await db
+    .update(usersTable)
+    .set({ tiktokUsername: null, tiktokSessionToken: null, updatedAt: new Date() })
+    .where(eq(usersTable.id, req.user!.id));
 
-  accountState.connected = false;
-  accountState.username = null;
-  accountState.displayName = null;
-  accountState.avatarUrl = null;
-  accountState.followersCount = null;
-  accountState.followingCount = null;
-  accountState.connectedAt = null;
-
-  import("./logs.js").then(({ addLog }) => {
-    addLog("account_disconnect", `Disconnected TikTok account @${prevUsername}`);
+  await logAudit("tiktok.disconnected", {
+    userId: req.user!.id,
+    category: "account",
+    details: { username: prevUsername },
+    ipAddress: req.ip,
   });
 
-  res.json(accountState);
+  res.json({ connected: false, username: null, displayName: null, avatarUrl: null, followersCount: null, followingCount: null, connectedAt: null });
 });
 
 export default router;
