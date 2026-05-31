@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Auto Repost Cleaner"
+version = "1.0.0"
+id = "artifacts/auto-repost-cleaner"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19305
+
+[services.development]
+run = "pnpm --filter @workspace/auto-repost-cleaner run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/auto-repost-cleaner", "run", "build" ]
+publicDir = "artifacts/auto-repost-cleaner/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19305"
+BASE_PATH = "/"

@@ -1,22 +1,32 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Auto Repost Cleaner API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: account
+    description: TikTok account management
+  - name: reposts
+    description: Repost detection and removal
+  - name: automation
+    description: Auto-mode automation control
+  - name: logs
+    description: Activity log
+  - name: settings
+    description: User settings
+  - name: stats
+    description: Dashboard statistics
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +34,209 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /account:
+    get:
+      operationId: getAccount
+      tags: [account]
+      summary: Get connected TikTok account info
+      responses:
+        "200":
+          description: Account info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+
+  /account/connect:
+    post:
+      operationId: connectAccount
+      tags: [account]
+      summary: Connect a TikTok account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountConnect"
+      responses:
+        "200":
+          description: Account connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+
+  /account/disconnect:
+    post:
+      operationId: disconnectAccount
+      tags: [account]
+      summary: Disconnect the TikTok account
+      responses:
+        "200":
+          description: Disconnected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+
+  /stats:
+    get:
+      operationId: getStats
+      tags: [stats]
+      summary: Get dashboard statistics
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stats"
+
+  /reposts:
+    get:
+      operationId: getReposts
+      tags: [reposts]
+      summary: List detected reposts
+      responses:
+        "200":
+          description: List of reposts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Repost"
+
+  /reposts/scan:
+    post:
+      operationId: scanReposts
+      tags: [reposts]
+      summary: Trigger a manual repost scan
+      responses:
+        "200":
+          description: Scan result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanResult"
+
+  /reposts/remove-all:
+    post:
+      operationId: removeAllReposts
+      tags: [reposts]
+      summary: Remove all detected reposts
+      responses:
+        "200":
+          description: Removal result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RemoveResult"
+
+  /reposts/{id}:
+    delete:
+      operationId: removeRepost
+      tags: [reposts]
+      summary: Remove a specific repost by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Repost"
+
+  /automation:
+    get:
+      operationId: getAutomation
+      tags: [automation]
+      summary: Get current automation status
+      responses:
+        "200":
+          description: Automation status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Automation"
+
+  /automation/start:
+    post:
+      operationId: startAutomation
+      tags: [automation]
+      summary: Start auto-mode (continuous monitoring)
+      responses:
+        "200":
+          description: Automation started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Automation"
+
+  /automation/stop:
+    post:
+      operationId: stopAutomation
+      tags: [automation]
+      summary: Stop auto-mode
+      responses:
+        "200":
+          description: Automation stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Automation"
+
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get user settings
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+    patch:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update user settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsUpdate"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+
+  /logs:
+    get:
+      operationId: getLogs
+      tags: [logs]
+      summary: Get activity log entries
+      responses:
+        "200":
+          description: Log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LogEntry"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +244,156 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    Account:
+      type: object
+      properties:
+        connected:
+          type: boolean
+        username:
+          type: ["string", "null"]
+        displayName:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        followersCount:
+          type: ["integer", "null"]
+        followingCount:
+          type: ["integer", "null"]
+        connectedAt:
+          type: ["string", "null"]
+      required: [connected]
+
+    AccountConnect:
+      type: object
+      properties:
+        username:
+          type: string
+        sessionToken:
+          type: string
+      required: [username, sessionToken]
+
+    Stats:
+      type: object
+      properties:
+        totalRemoved:
+          type: integer
+        removedToday:
+          type: integer
+        removedThisWeek:
+          type: integer
+        pendingReposts:
+          type: integer
+        lastScanAt:
+          type: ["string", "null"]
+        automationActive:
+          type: boolean
+        dailyData:
+          type: array
+          items:
+            $ref: "#/components/schemas/DailyCount"
+      required: [totalRemoved, removedToday, removedThisWeek, pendingReposts, automationActive, dailyData]
+
+    DailyCount:
+      type: object
+      properties:
+        date:
+          type: string
+        count:
+          type: integer
+      required: [date, count]
+
+    Repost:
+      type: object
+      properties:
+        id:
+          type: string
+        videoId:
+          type: string
+        originalAuthor:
+          type: string
+        description:
+          type: ["string", "null"]
+        repostedAt:
+          type: string
+        thumbnailUrl:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, removed, failed]
+      required: [id, videoId, originalAuthor, repostedAt, status]
+
+    ScanResult:
+      type: object
+      properties:
+        found:
+          type: integer
+        newFound:
+          type: integer
+        scannedAt:
+          type: string
+      required: [found, newFound, scannedAt]
+
+    RemoveResult:
+      type: object
+      properties:
+        removed:
+          type: integer
+        failed:
+          type: integer
+      required: [removed, failed]
+
+    Automation:
+      type: object
+      properties:
+        active:
+          type: boolean
+        intervalMinutes:
+          type: integer
+        nextRunAt:
+          type: ["string", "null"]
+        startedAt:
+          type: ["string", "null"]
+      required: [active, intervalMinutes]
+
+    Settings:
+      type: object
+      properties:
+        scanIntervalMinutes:
+          type: integer
+        autoRemove:
+          type: boolean
+        notifications:
+          type: boolean
+        notifyOnRemoval:
+          type: boolean
+      required: [scanIntervalMinutes, autoRemove, notifications, notifyOnRemoval]
+
+    SettingsUpdate:
+      type: object
+      properties:
+        scanIntervalMinutes:
+          type: integer
+        autoRemove:
+          type: boolean
+        notifications:
+          type: boolean
+        notifyOnRemoval:
+          type: boolean
+
+    LogEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [scan, removal, automation_start, automation_stop, account_connect, account_disconnect, error]
+        message:
+          type: string
+        detail:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required: [id, type, message, createdAt]
