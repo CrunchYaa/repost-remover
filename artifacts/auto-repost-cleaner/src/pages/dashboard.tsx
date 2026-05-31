@@ -274,6 +274,26 @@ export default function Dashboard() {
             Last scan: {format(new Date(stats.lastScanAt), "MMM d, HH:mm:ss")}
           </p>
         )}
+
+        {/* Copyright */}
+        <div className="fixed bottom-4 left-4 pointer-events-none" data-testid="text-copyright">
+          <p
+            className="text-[10px] leading-tight"
+            style={{
+              color: "rgba(255,255,255,0.18)",
+              backdropFilter: "blur(4px)",
+              WebkitBackdropFilter: "blur(4px)",
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              borderRadius: "6px",
+              padding: "4px 8px",
+              fontWeight: 400,
+              letterSpacing: "0.02em",
+            }}
+          >
+            &copy; {new Date().getFullYear()} tik@l707e
+          </p>
+        </div>
       </div>
     </Layout>
   );
