@@ -88,7 +88,7 @@ export default function Reposts() {
               variant="outline"
               size="sm"
               disabled={scanMutation.isPending}
-              onClick={() => scanMutation.mutate({})}
+              onClick={() => scanMutation.mutate()}
               className="border-border hover:border-blue-500/50 text-muted-foreground hover:text-white"
               data-testid="button-scan-now"
             >
@@ -103,7 +103,7 @@ export default function Reposts() {
               <Button
                 size="sm"
                 disabled={removeAllMutation.isPending}
-                onClick={() => removeAllMutation.mutate({})}
+                onClick={() => removeAllMutation.mutate()}
                 className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white"
                 data-testid="button-remove-all"
               >

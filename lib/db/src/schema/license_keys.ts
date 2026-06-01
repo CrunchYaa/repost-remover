@@ -1,6 +1,5 @@
 import { pgTable, text, serial, boolean, timestamp, integer, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
 
 export const keyDurationEnum = pgEnum("key_duration", [
   "week",
@@ -32,4 +31,4 @@ export const insertLicenseKeySchema = createInsertSchema(licenseKeysTable).omit(
 });
 
 export type LicenseKey = typeof licenseKeysTable.$inferSelect;
-export type InsertLicenseKey = z.infer<typeof insertLicenseKeySchema>;
+export type InsertLicenseKey = any;

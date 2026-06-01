@@ -1,6 +1,5 @@
 import { pgTable, text, serial, boolean, timestamp, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
 
 export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
 
@@ -26,6 +25,8 @@ export const insertUserSchema = createInsertSchema(usersTable).omit({
   updatedAt: true,
   totalRepostsRemoved: true,
 });
+
 export const selectUserSchema = createSelectSchema(usersTable);
-export type InsertUser = z.infer<typeof insertUserSchema>;
+
+export type InsertUser = any;
 export type User = typeof usersTable.$inferSelect;

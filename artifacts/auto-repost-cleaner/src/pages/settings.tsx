@@ -286,7 +286,7 @@ export default function Settings() {
                 variant="ghost"
                 size="sm"
                 disabled={disconnectMutation.isPending}
-                onClick={() => disconnectMutation.mutate({})}
+                onClick={() => disconnectMutation.mutate()}
                 className="text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs"
                 data-testid="button-disconnect-account"
               >

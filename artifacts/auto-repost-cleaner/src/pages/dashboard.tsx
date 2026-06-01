@@ -155,9 +155,9 @@ export default function Dashboard() {
 
           {/* Big power toggle */}
           <button
-            data-testid="button-auto-mode-toggle"
-            disabled={isToggling}
-            onClick={() => (isActive ? stopMutation.mutate({}) : startMutation.mutate({}))}
+  data-testid="button-auto-mode-toggle"
+  disabled={isToggling}
+  onClick={() => (isActive ? stopMutation.mutate() : startMutation.mutate())}
             className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 disabled:opacity-50 ${
               isActive
                 ? "bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-[0_0_30px_rgba(52,211,153,0.4)] hover:shadow-[0_0_40px_rgba(52,211,153,0.6)]"
