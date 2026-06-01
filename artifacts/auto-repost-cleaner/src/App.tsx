@@ -18,6 +18,8 @@ import AdminDashboard from "@/pages/admin/index";
 import AdminUsersPage from "@/pages/admin/users";
 import AdminKeysPage from "@/pages/admin/keys";
 import AdminLogsPage from "@/pages/admin/logs";
+import TermsOfService from "@/pages/terms";
+import PrivacyPolicy from "@/pages/privacy";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -84,6 +86,10 @@ function Router() {
       <Route path="/logs"><ProtectedRoute component={Logs} /></Route>
       <Route path="/settings"><ProtectedRoute component={Settings} /></Route>
       <Route path="/connect"><ProtectedRoute component={Connect} /></Route>
+
+      {/* Public legal pages */}
+      <Route path="/terms" component={TermsOfService} />
+      <Route path="/privacy" component={PrivacyPolicy} />
 
       {/* Home — redirect based on auth state */}
       <Route path="/">
