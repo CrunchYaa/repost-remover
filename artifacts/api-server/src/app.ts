@@ -4,6 +4,8 @@ import pinoHttp from "pino-http";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import path from "path";
+import fs from "fs";
 import router from "./routes";
 import { logger } from "./lib/logger";
 
@@ -51,5 +53,19 @@ app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 app.use("/api/auth", authLimiter);
 app.use("/api", apiLimiter);
 app.use("/api", router);
+
+// In production: serve the built React frontend
+if (process.env.NODE_ENV === "production") {
+  const frontendDir = path.resolve(process.cwd(), "artifacts/auto-repost-cleaner/dist/public");
+  if (fs.existsSync(frontendDir)) {
+    app.use(express.static(frontendDir));
+    app.get("*", (_req, res) => {
+      res.sendFile(path.join(frontendDir, "index.html"));
+    });
+    logger.info({ frontendDir }, "Serving frontend static files");
+  } else {
+    logger.warn({ frontendDir }, "Frontend build not found — static serving disabled");
+  }
+}
 
 export default app;
